@@ -3,18 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Frontend</title>
+    <title>Gestión de Restaurante</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Gestión de Elementos</h1>
-        <form id="crud-form">
-            <input type="text" id="name" placeholder="Nombre" required>
+    <nav>
+        <div class="logo">Gestión de Restaurante</div>
+        <ul class="nav-links">
+            <li><a href="#home">Inicio</a></li>
+            <li><a href="#register">Agregar Platillo</a></li>
+            <li><a href="#list">Menú</a></li>
+        </ul>
+    </nav>
+
+    <section id="home" class="landing">
+        <h1>Bienvenido al sistema de gestión de restaurante</h1>
+        <p>Administra fácilmente el menú de tu restaurante.</p>
+    </section>
+
+    <section id="register" class="form-section">
+        <h2>Agregar Platillo</h2>
+        <form id="registerForm">
+            <input type="text" id="dishName" placeholder="Nombre del platillo" required>
+            <input type="text" id="price" placeholder="Precio" required>
+            <input type="text" id="category" placeholder="Categoría" required>
             <button type="submit">Agregar</button>
         </form>
-        <ul id="item-list"></ul>
-    </div>
-    <script src="script.js"></script>
+    </section>
+
+    <section id="list" class="list-section">
+        <h2>Menú</h2>
+        <input type="text" id="search" placeholder="Buscar por nombre, precio o categoría">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Categoría</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="menuList">
+                <!-- Datos dinámicos -->
+            </tbody>
+        </table>
+    </section>
+
+<script src="/script.js"></script>
 </body>
 </html>

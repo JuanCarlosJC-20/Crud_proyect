@@ -1,55 +1,73 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("crud-form");
-    const itemList = document.getElementById("item-list");
-    let items = [];
-
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const nameInput = document.getElementById("name");
-        if (nameInput.value.trim() !== "") {
-            addItem(nameInput.value);
-            nameInput.value = "";
+    const registerForm = document.getElementById("registerForm");
+    const menuList = document.getElementById("menuList");
+    const searchInput = document.getElementById("search");
+    let menu = [];
+    let editingId = null;
+    
+    registerForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = document.getElementById("dishName").value;
+        const price = document.getElementById("price").value;
+        const category = document.getElementById("category").value;
+        
+        if (editingId) {
+            // Editar platillo existente
+            const dishIndex = menu.findIndex(dish => dish.id === editingId);
+            menu[dishIndex] = { id: editingId, name, price, category };
+            editingId = null;
+        } else {
+            // Agregar nuevo platillo
+            const newDish = {
+                id: menu.length + 1,
+                name,
+                price,
+                category
+            };
+            menu.push(newDish);
         }
+        renderMenu();
+        registerForm.reset();
     });
 
-    function addItem(name) {
-        const item = { id: Date.now(), name };
-        items.push(item);
-        renderItems();
-    }
-
-    function renderItems() {
-        itemList.innerHTML = "";
-        items.forEach(item => {
-            const li = document.createElement("li");
-            li.textContent = item.name;
-
-            const editButton = document.createElement("button");
-            editButton.textContent = "Editar";
-            editButton.classList.add("edit");
-            editButton.onclick = () => editItem(item.id);
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Eliminar";
-            deleteButton.classList.add("delete");
-            deleteButton.onclick = () => deleteItem(item.id);
-
-            li.appendChild(editButton);
-            li.appendChild(deleteButton);
-            itemList.appendChild(li);
+    function renderMenu(filter = "") {
+        menuList.innerHTML = "";
+        menu.filter(dish => 
+            dish.name.toLowerCase().includes(filter) ||
+            dish.price.includes(filter) ||
+            dish.category.toLowerCase().includes(filter)
+        ).forEach(dish => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${dish.id}</td>
+                <td>${dish.name}</td>
+                <td>${dish.price}</td>
+                <td>${dish.category}</td>
+                <td>
+                    <button onclick="editDish(${dish.id})">Editar</button>
+                    <button onclick="deleteDish(${dish.id})">Eliminar</button>
+                </td>
+            `;
+            menuList.appendChild(row);
         });
     }
 
-    function editItem(id) {
-        const newName = prompt("Editar nombre del elemento:", items.find(item => item.id === id).name);
-        if (newName) {
-            items = items.map(item => item.id === id ? { ...item, name: newName } : item);
-            renderItems();
-        }
-    }
+    searchInput.addEventListener("input", (event) => {
+        renderMenu(event.target.value.toLowerCase());
+    });
 
-    function deleteItem(id) {
-        items = items.filter(item => item.id !== id);
-        renderItems();
-    }
+    window.deleteDish = (id) => {
+        menu = menu.filter(dish => dish.id !== id);
+        renderMenu();
+    };
+
+    window.editDish = (id) => {
+        const dish = menu.find(dish => dish.id === id);
+        if (dish) {
+            document.getElementById("dishName").value = dish.name;
+            document.getElementById("price").value = dish.price;
+            document.getElementById("category").value = dish.category;
+            editingId = id;
+        }
+    };
 });

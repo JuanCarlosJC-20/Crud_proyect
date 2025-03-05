@@ -1,37 +1,66 @@
+/* Estilos generales */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    box-sizing: border-box;
     background-color: #f4f4f4;
 }
 
-.container {
-    background: white;
+/* Navbar */
+nav {
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    align-items: center;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+}
+
+.nav-links li {
+    display: inline;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+}
+
+/* Secciones */
+section {
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
     text-align: center;
 }
 
-input {
-    width: calc(100% - 20px);
+/* Formulario */
+.form-section form {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+    margin: auto;
+    gap: 10px;
+}
+
+input, button {
     padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    font-size: 16px;
 }
 
 button {
-    padding: 10px 15px;
     background-color: #28a745;
     color: white;
     border: none;
-    border-radius: 5px;
     cursor: pointer;
 }
 
@@ -39,37 +68,30 @@ button:hover {
     background-color: #218838;
 }
 
-ul {
-    list-style: none;
-    padding: 0;
+/* Tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
-li {
-    background: #fff;
-    margin: 5px 0;
-    padding: 10px;
+th, td {
     border: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 8px;
 }
 
-.edit, .delete {
-    cursor: pointer;
-    padding: 5px;
-    margin-left: 5px;
-}
-
-.edit {
-    background-color: #007bff;
+th {
+    background-color: #333;
     color: white;
-    border: none;
-    border-radius: 3px;
 }
 
-.delete {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 3px;
+/* Responsividad */
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+    }
+
+    table {
+        font-size: 14px;
+    }
 }
