@@ -12,7 +12,7 @@ import jakarta.persistence.ManyToMany;
 @Entity(name="categories")
 public class categoriesDTO {
 
-     @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id_categories;
@@ -22,5 +22,31 @@ public class categoriesDTO {
     
     @ManyToMany(mappedBy="categories")
     private Set<productDTO> product;
+
+    public int getId_categories() {
+        return id_categories;
+    }
+
+    public void setId_categories(int id_categories) {
+        this.id_categories = id_categories;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<productDTO> getProduct() {
+        return product;
+    }
+
+    public void setProduct(Set<productDTO> product) {
+        this.product = product;
+    }
+    
+
 
 }
