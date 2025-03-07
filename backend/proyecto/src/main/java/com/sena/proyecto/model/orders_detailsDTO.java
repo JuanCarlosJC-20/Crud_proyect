@@ -27,4 +27,37 @@ public class orders_detailsDTO {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    public int getId_details() {
+        return id_details;
+    }
+
+    public void setId_details(int id_details) {
+        this.id_details = id_details;
+    }
+
+    public ordersDTO getId_rders() {
+        return id_rders;
+    }
+
+    public void setId_rders(ordersDTO id_rders) {
+        this.id_rders = id_rders;
+    }
+
+    public productDTO getId_prducto() {
+        return id_prducto;
+    }
+
+    public void setId_prducto(productDTO id_prducto) {
+        this.id_prducto = id_prducto;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    
 }

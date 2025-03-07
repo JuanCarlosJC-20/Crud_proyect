@@ -26,4 +26,36 @@ public class ordersDTO {
     @JoinColumn(name = "id_costumers")
     private customersDTO  id_customers;
 
+
+    public int getId_orders() {
+        return id_orders;
+    }
+
+
+    public void setId_orders(int id_orders) {
+        this.id_orders = id_orders;
+    }
+
+
+    public Date getDate() {
+        return date;
+    }
+
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+
+    public customersDTO getId_customers() {
+        return id_customers;
+    }
+
+
+    public void setId_customers(customersDTO id_customers) {
+        this.id_customers = id_customers;
+    }
+
+    
+
 }
