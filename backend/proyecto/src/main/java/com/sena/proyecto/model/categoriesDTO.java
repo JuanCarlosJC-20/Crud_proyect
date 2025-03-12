@@ -17,7 +17,7 @@ public class categoriesDTO {
     @Column(name = "id")
     private int id_categories;
 
-    @Column(name="name",nullable = false,length = 50)
+    @Column(name="name",nullable = false ,length = 50)
     private String name;
     
     @ManyToMany(mappedBy="categories")
