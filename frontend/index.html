@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Restaurante</title>
+    <title>Gestión de Tienda</title>
     <link rel="stylesheet" href="/styles/style.css">
 </head>
 <body>
     <nav>
-        <div class="logo">Gestión de Restaurante</div>
+        <div class="logo">Gestión de Tienda</div>
         <ul class="nav-links">
             <li><a href="#home">Inicio</a></li>
-            <li><a href="#register">Agregar Platillo</a></li>
-            <li><a href="#list">Menú</a></li>
+            <li><a href="#register">Agregar Producto</a></li>
+            <li><a href="#list">Inventario</a></li>
         </ul>
     </nav>
 
     <section id="home" class="landing">
-        <h1>Bienvenido al sistema de gestión de restaurante</h1>
-        <p>Administra fácilmente el menú de tu restaurante.</p>
+        <h1 id="color">Bienvenido al sistema de gestión de tienda</h1>
+        <p id="color">Administra fácilmente el inventario de tu tienda.</p>
     </section>
 
     <section id="register" class="form-section">
-        <h2>Agregar Platillo</h2>
+        <h2 id="color">Agregar Producto</h2>
         <form id="registerForm">
-            <input type="text" id="dishName" placeholder="Nombre del platillo" required>
+            <input type="text" id="productName" placeholder="Nombre del producto" required>
             <input type="text" id="price" placeholder="Precio" required>
             <input type="text" id="category" placeholder="Categoría" required>
             <button type="submit">Agregar</button>
@@ -32,7 +32,7 @@
     </section>
 
     <section id="list" class="list-section">
-        <h2>Menú</h2>
+        <h2 id="color">Inventario</h2>
         <input type="text" id="search" placeholder="Buscar por nombre, precio o categoría">
         <table>
             <thead>
@@ -44,7 +44,7 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="menuList">
+            <tbody id="inventoryList">
                 <!-- Datos dinámicos -->
             </tbody>
         </table>
