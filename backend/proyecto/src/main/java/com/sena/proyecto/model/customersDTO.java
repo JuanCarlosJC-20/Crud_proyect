@@ -16,6 +16,17 @@ public class customersDTO {
 
     @Column(name="name",nullable = false,length=100)
     private String name;
+    //columna status para que? no se .
+    @Column(name = "status", nullable = false)
+    private int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     public int getId_costumers() {
         return id_costumers;

@@ -5,9 +5,10 @@ body {
     padding: 0;
     box-sizing: border-box;
     background-color: #f4f4f4;
-    background-image: url(/img/fondo1.jpg);
+    background-image: url(/img/fondo2.jpg);
     background-size: cover;
     background-repeat: no-repeat;
+
 }
 
 /* Navbar */
@@ -18,12 +19,14 @@ nav {
     justify-content: space-between;
     padding: 15px;
     align-items: center;
+    box-shadow: 1px 1px 10px wheat;
  
 }
 
 .logo {
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;
+    
 }
 
 .nav-links {
@@ -68,6 +71,7 @@ button {
     border: none;
     cursor: pointer;
     border-radius: 10rem;
+    box-shadow: 1px 1px 10px slateblue;
     
     
 }
@@ -81,6 +85,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
+    box-shadow: 1px 1px 10px red;
 }
 
 th, td {
@@ -112,4 +117,13 @@ th {
 /*agrego los bordes mas suaves al input*/
 input{
     border-radius: 2rem;
+    box-shadow: 1px 1px 10px wheat ;
+}
+/*tamaño de letra h1 y parrafo*/
+h1{
+    font-size: 40px;
+    
+}
+p{
+font-size: 20px;
 }

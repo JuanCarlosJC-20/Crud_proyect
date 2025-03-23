@@ -18,6 +18,7 @@ public class OrdersController {
         ){
             ordersService.save(orders);
         return "register ok";
+        
     }
 
 }
