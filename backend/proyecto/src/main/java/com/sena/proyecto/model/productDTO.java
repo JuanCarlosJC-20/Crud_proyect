@@ -23,6 +23,17 @@ public class productDTO {
     @Column(name="name",nullable = false,length=100)
     private String name;
 
+    @Column(name = "status", nullable = false)
+    private int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     @ManyToMany
     @JoinTable(
         name = "product_categories",

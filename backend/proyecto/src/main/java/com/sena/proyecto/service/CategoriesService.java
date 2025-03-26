@@ -38,7 +38,7 @@ public class CategoriesService {
         if (categories.getName().length() < 1 || categories.getName().length() > 255) {
             responseDTO response = new responseDTO(
                     "Error",
-                    "El titulo debe tener una longitud entre 1 y 255 caracteres");
+                    "El nombre debe tener una longitud entre 1 y 255 caracteres");
             return response;
         }
 
@@ -53,8 +53,8 @@ public class CategoriesService {
     // for delet
     public responseDTO delete(int id) {
         
-        categoriesDTO categories = getCategoriesById(id);
-        categories.setStatus(0);
+        categoriesDTO categories = getcategoriesById(id);
+        categories.setStatus(1);
         CategoriesRepository.save(categories);
         responseDTO response = new responseDTO(
                 "OK",

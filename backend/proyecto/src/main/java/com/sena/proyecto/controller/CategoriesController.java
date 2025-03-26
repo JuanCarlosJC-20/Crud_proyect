@@ -31,7 +31,7 @@ public class CategoriesController {
         categories.save(categoriesService);
         return "register ok";
     }
-    //aplica lo ultimo
+    //aplica lo ultimo controller para filtar eliminar etc.
      @GetMapping("/")
     public ResponseEntity<Object> findAllcateogires() {
         List<categoriesDTO> listcategories = categoriesService.getAllCategories();

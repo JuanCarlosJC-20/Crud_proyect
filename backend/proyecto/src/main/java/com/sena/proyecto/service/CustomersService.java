@@ -34,11 +34,11 @@ public class CustomersService {
 
    
             //aqui empiza el codigo de flitarar y todo
-    public List<customersDTO> getFiltercategories(String filter) {
+    public List<customersDTO> getFiltercustomers(String filter) {
         return CustomersRepository.search(filter);
     }
 
-    public customersDTO getcategoriesById(int id) {
+    public customersDTO getcustomersById(int id) {
         return CustomersRepository.findById(id).get();
     }
 
@@ -60,6 +60,16 @@ public class CustomersService {
         // return true;
     }
     // for delet
+    public responseDTO delete(int id) {
+        
+        customersDTO customers = getcustomersById(id);
+        customers.setStatus(1);
+        CustomersRepository.save(customers);
+        responseDTO response = new responseDTO(
+                "OK",
+                "Se eliminó correctamente");
+        return response;
+    }
    
 
 }

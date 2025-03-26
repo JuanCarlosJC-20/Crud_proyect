@@ -7,7 +7,7 @@ import com.sena.proyecto.model.customersDTO;
 
 public interface CustomersRepository extends JpaRepository<customersDTO,Integer> {
   @Query("SELECT b FROM customers b WHERE b.status=1")
-    List<customersDTO> findAllcategoriesActive();
+    List<customersDTO> findAllcustomersActive();
 
     // @Query("SELECT b FROM book b WHERE b.title LIKE %?1%")
     // List<bookDTO> search(String filter);
