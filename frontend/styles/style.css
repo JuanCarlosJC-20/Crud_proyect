@@ -8,7 +8,6 @@ body {
     background-image: url(/img/fondo2.jpg);
     background-size: cover;
     background-repeat: no-repeat;
-
 }
 
 /* Navbar */
@@ -20,13 +19,11 @@ nav {
     padding: 15px;
     align-items: center;
     box-shadow: 1px 1px 10px wheat;
- 
 }
 
 .logo {
     font-size: 30px;
     font-weight: bold;
-    
 }
 
 .nav-links {
@@ -57,7 +54,6 @@ section {
     max-width: 300px;
     margin: auto;
     gap: 10px;
-   
 }
 
 input, button {
@@ -72,8 +68,6 @@ button {
     cursor: pointer;
     border-radius: 10rem;
     box-shadow: 1px 1px 10px slateblue;
-    
-    
 }
 
 button:hover {
@@ -117,13 +111,58 @@ th {
 /*agrego los bordes mas suaves al input*/
 input{
     border-radius: 2rem;
-    box-shadow: 1px 1px 10px wheat ;
+    box-shadow: 1px 1px 10px wheat;
 }
 /*tamaño de letra h1 y parrafo*/
 h1{
     font-size: 40px;
-    
 }
 p{
-font-size: 20px;
+    font-size: 20px;
+}
+
+/* Estilos para el Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: rgba(51, 51, 51, 0.9);
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(102, 0, 204, 0.7);
+    animation: modalfade 0.4s;
+}
+
+@keyframes modalfade {
+    from {opacity: 0; transform: translateY(-50px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.close {
+    color: #ddd;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #6600CC;
+    text-decoration: none;
+    cursor: pointer;
 }

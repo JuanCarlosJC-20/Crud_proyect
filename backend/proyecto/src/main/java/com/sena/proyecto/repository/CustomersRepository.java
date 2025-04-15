@@ -1,16 +1,17 @@
 package com.sena.proyecto.repository;
 
-import java.util.List;
+import com.sena.proyecto.model.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import com.sena.proyecto.model.customersDTO;
+import org.springframework.stereotype.Repository;
 
-public interface CustomersRepository extends JpaRepository<customersDTO,Integer> {
-  @Query("SELECT b FROM customers b WHERE b.status=1")
-    List<customersDTO> findAllcustomersActive();
+import java.util.List;
 
-    // @Query("SELECT b FROM book b WHERE b.title LIKE %?1%")
-    // List<bookDTO> search(String filter);
-    @Query("SELECT b FROM customers b WHERE b.name LIKE %?1%")
-    List<customersDTO> search(String filter);
+@Repository
+public interface CustomersRepository extends JpaRepository<Customer, Integer> {
+
+    // Buscar clientes cuyo nombre contenga una cadena (ignora mayúsculas)
+    List<Customer> findByNameContainingIgnoreCase(String name);
+
+    // Buscar clientes por email (filtro exacto, pero puedes personalizarlo)
+    List<Customer> findByEmailContainingIgnoreCase(String email);
 }

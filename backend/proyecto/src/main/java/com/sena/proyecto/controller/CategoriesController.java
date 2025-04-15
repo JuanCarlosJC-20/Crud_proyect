@@ -1,63 +1,50 @@
 package com.sena.proyecto.controller;
 
+import com.sena.proyecto.model.Category;
+import com.sena.proyecto.service.CategoryService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.sena.proyecto.model.categoriesDTO;
-import com.sena.proyecto.service.CategoriesService;
-
-import responseDTO.responseDTO;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/categories")
+@RequestMapping("/api/categories")  // Cambié el path para que sea "/api/categories" y no "/api/products"
 public class CategoriesController {
+
     @Autowired
-    private CategoriesService categoriesService;
+    private CategoryService categoryService;
 
-    @PostMapping("/")
-    public String registerCategories(
-        @RequestBody  categoriesDTO  categories
-        ) {
-        categories.save(categoriesService);
-        return "register ok";
-    }
-    //aplica lo ultimo controller para filtar eliminar etc.
-     @GetMapping("/")
-    public ResponseEntity<Object> findAllcateogires() {
-        List<categoriesDTO> listcategories = categoriesService.getAllCategories();
-        return new ResponseEntity<>(listcategories, HttpStatus.OK);
+    // Obtener todas las categorías
+    @GetMapping
+    public List<Category> getAll() {
+        return categoryService.findAll();  // Cambié "getAll()" por "findAll()"
     }
 
+    // Obtener una categoría por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Object> findByIdcategories(@PathVariable int id) {
-        categoriesDTO categories = categoriesService.getCategoriesById(id);
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+    public Category getById(@PathVariable int id) {
+        Optional<Category> category = categoryService.findById(id);  // Cambié "getById()" por "findById()"
+        return category.orElse(null);  // Retorna null si no se encuentra la categoría
     }
 
-    @GetMapping("/search/{filter}")
-    public ResponseEntity<Object> search(@PathVariable String filter) {
-        List<categoriesDTO> listcategories = categoriesService.getFiltercategories(filter);
-        return new ResponseEntity<>(listcategories, HttpStatus.OK);
+    // Crear una nueva categoría
+    @PostMapping
+    public Category create(@RequestBody Category category) {
+        return categoryService.save(category);
     }
 
+    // Actualizar una categoría
+    @PutMapping("/{id}")
+    public Category update(@PathVariable int id, @RequestBody Category category) {
+        category.setId(id);
+        return categoryService.save(category);
+    }
+
+    // Eliminar una categoría
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletecategories(@PathVariable int id) {
-        responseDTO response = categoriesService.delete(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public void delete(@PathVariable int id) {
+        categoryService.deleteById(id);
     }
-
-      
-
-
-
 }

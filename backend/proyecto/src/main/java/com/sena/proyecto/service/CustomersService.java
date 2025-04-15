@@ -1,75 +1,46 @@
 package com.sena.proyecto.service;
 
+import com.sena.proyecto.model.Customer;
+import com.sena.proyecto.repository.CustomersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sena.proyecto.repository.CustomersRepository;
-
-import responseDTO.responseDTO;
-
-import com.sena.proyecto.model.customersDTO;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomersService {
- //se realiza la conexión con el repositorio
+
     @Autowired
-    private CustomersRepository CustomersRepository;
-    /*
-     * crear
-     * eliminar
-     * actualizar
-     * leer lista completa
-     * leer el cliente por id
-     * adicional los requeridos
-     * 
-     */
-    public List<customersDTO> getAllCustomer(){
-        return CustomersRepository.findAll();
+    private CustomersRepository customersRepository;
+
+    // Obtener todos los clientes
+    public List<Customer> findAll() {
+        return customersRepository.findAll();
     }
 
-    public customersDTO getCustomerById(int id){
-        return CustomersRepository.findById(id).get();
+    // Buscar cliente por ID
+    public Optional<Customer> findById(int id) {
+        return customersRepository.findById(id);
     }
 
-   
-            //aqui empiza el codigo de flitarar y todo
-    public List<customersDTO> getFiltercustomers(String filter) {
-        return CustomersRepository.search(filter);
+    // Guardar o actualizar cliente
+    public Customer save(Customer customer) {
+        return customersRepository.save(customer);
     }
 
-    public customersDTO getcustomersById(int id) {
-        return CustomersRepository.findById(id).get();
+    // Eliminar cliente por ID
+    public void deleteById(int id) {
+        customersRepository.deleteById(id);
     }
 
-    
-    public responseDTO save(customersDTO customers) {
-        if (customers.getName().length() < 1 || customers.getName().length() > 255) {
-            responseDTO response = new responseDTO(
-                    "Error",
-                    "El nombre debe tener una longitud entre 1 y 255 caracteres");
-            return response;
-        }
-
-    CustomersRepository.save(customers);
-    responseDTO response = new responseDTO(
-        "ok",
-        "Se registro correctamente");
-
-         return response;
-        // return true;
+    // Buscar por nombre (filtro parcial, sin importar mayúsculas/minúsculas)
+    public List<Customer> findByName(String name) {
+        return customersRepository.findByNameContainingIgnoreCase(name);
     }
-    // for delet
-    public responseDTO delete(int id) {
-        
-        customersDTO customers = getcustomersById(id);
-        customers.setStatus(1);
-        CustomersRepository.save(customers);
-        responseDTO response = new responseDTO(
-                "OK",
-                "Se eliminó correctamente");
-        return response;
-    }
-   
 
+    // Buscar por email (filtro parcial, sin importar mayúsculas/minúsculas)
+    public List<Customer> findByEmail(String email) {
+        return customersRepository.findByEmailContainingIgnoreCase(email);
+    }
 }

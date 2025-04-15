@@ -1,65 +1,50 @@
 package com.sena.proyecto.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.sena.proyecto.model.customersDTO;
+import com.sena.proyecto.model.Customer;
 import com.sena.proyecto.service.CustomersService;
 
-import responseDTO.responseDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping("/api/customers")  // Ruta del controlador de clientes
 public class CustomersController {
- @Autowired
+
+    @Autowired
     private CustomersService customersService;
 
-    @PostMapping("/customers")
-    public String registerCustomer(
-        @RequestBody customersDTO customer
-        ){
-            customersService.save(customer);
-        return "register ok";
+    // Obtener todos los clientes
+    @GetMapping
+    public List<Customer> getAll() {
+        return customersService.findAll();  // Cambié "getAll()" por "findAll()"
     }
 
-     //aplica lo ultimo controller para filtar eliminar etc.
-     @GetMapping("/")
-    public ResponseEntity<Object> findAllcustomers() {
-        List<customersDTO> listcustomers = customersService.getAllCustomer();
-        return new ResponseEntity<>(listcustomers, HttpStatus.OK);
-    }
-
+    // Obtener un cliente por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Object> findByIdcustomers(@PathVariable int id) {
-        customersDTO customers = customersService.getcustomersById(id);
-        return new ResponseEntity<>(customers, HttpStatus.OK);
+    public Customer getById(@PathVariable int id) {
+        Optional<Customer> customer = customersService.findById(id);  // Cambié "getById()" por "findById()"
+        return customer.orElse(null);  // Retorna null si no se encuentra el cliente
     }
 
-    @GetMapping("/search/{filter}")
-    public ResponseEntity<Object> search(@PathVariable String filter) {
-        List<customersDTO> listcustomers = customersService.getFiltercustomers(filter);
-        return new ResponseEntity<>(listcustomers, HttpStatus.OK);
+    // Crear un nuevo cliente
+    @PostMapping
+    public Customer create(@RequestBody Customer customer) {
+        return customersService.save(customer);
     }
 
+    // Actualizar un cliente
+    @PutMapping("/{id}")
+    public Customer update(@PathVariable int id, @RequestBody Customer customer) {
+        customer.setId(id);
+        return customersService.save(customer);
+    }
+
+    // Eliminar un cliente
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletecustomers(@PathVariable int id) {
-        responseDTO response = customersService.delete(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public void delete(@PathVariable int id) {
+        customersService.deleteById(id);  // Cambié "delete()" por "deleteById()" para que coincida con el servicio
     }
-
-
-
-
-
-
 }

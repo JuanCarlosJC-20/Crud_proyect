@@ -12,7 +12,7 @@
         <ul class="nav-links">
             <li><a href="#home">Inicio</a></li>
             <li><a href="#register">Agregar Producto</a></li>
-            <li><a href="#list">Inventario</a></li>
+            <li><a id="inventoryBtn" href="#list">Inventario</a></li>
         </ul>
     </nav>
 
@@ -28,28 +28,34 @@
             <input type="text" id="price" placeholder="Precio" required>
             <input type="text" id="category" placeholder="Categoría" required>
             <button type="submit">Agregar</button>
+            
         </form>
+       
     </section>
 
-    <section id="list" class="list-section">
-        <h2 id="color">Inventario</h2>
-        <input type="text" id="search" placeholder="Buscar por nombre, precio o categoría">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Categoría</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="inventoryList">
-                <!-- Datos dinámicos -->
-            </tbody>
-        </table>
-    </section>
+    <!-- Modal de Inventario -->
+    <div id="inventoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="color">Inventario</h2>
+            <input type="text" id="search" placeholder="Buscar por nombre, precio o categoría">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Categoría</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryList">
+                    <!-- Datos dinámicos -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<script src="/scripts/script.js"></script>
+    <script src="/scripts/script.js"></script>
 </body>
 </html>

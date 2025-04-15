@@ -1,29 +1,46 @@
 package com.sena.proyecto.service;
 
-import java.util.List;
-
+import com.sena.proyecto.model.Order;
+import com.sena.proyecto.repository.OrdersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.sena.proyecto.model.ordersDTO;
-import com.sena.proyecto.repository.OrdersRepository;
+
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrdersService {
+
     @Autowired
-    private OrdersRepository OrdersRepository;
-    
-      public List<ordersDTO> getAllOrders(){
-        return OrdersRepository.findAll();
+    private OrdersRepository ordersRepository;
+
+    // Obtener todas las órdenes
+    public List<Order> findAll() {
+        return ordersRepository.findAll();
     }
 
-    public ordersDTO getOrdersById(int id){
-        return OrdersRepository.findById(id).get();
+    // Buscar una orden por ID
+    public Optional<Order> findById(int id) {
+        return ordersRepository.findById(id);
     }
 
-     public boolean save(ordersDTO orders){
-       
-        OrdersRepository.save(orders);
-        return true;
+    // Guardar o actualizar una orden
+    public Order save(Order order) {
+        return ordersRepository.save(order);
     }
+
+    // Eliminar una orden por ID
+    public void deleteById(int id) {
+        ordersRepository.deleteById(id);
+    }
+
    
+
+ 
+
+    // Filtrar órdenes por ID del cliente
+    public List<Order> findByCustomerId(int customerId) {
+        return ordersRepository.findByCustomerId(customerId);
+    }
 }
