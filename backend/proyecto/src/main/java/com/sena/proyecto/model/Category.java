@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonIgnore;  // Añadir esta importación
+
 import java.util.List;
 
 @Entity
@@ -20,6 +22,7 @@ public class Category {
 
     // Relación inversa con los productos
     @OneToMany(mappedBy = "category")
+    @JsonIgnore  // Evita la recursividad infinita al serializar la categoría
     private List<Product> products;
 
     // Getters y setters

@@ -3,59 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Tienda</title>
-    <link rel="stylesheet" href="/styles/style.css">
+    <title>CRUD Tienda</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <div class="logo">Gestión de Tienda</div>
-        <ul class="nav-links">
-            <li><a href="#home">Inicio</a></li>
-            <li><a href="#register">Agregar Producto</a></li>
-            <li><a id="inventoryBtn" href="#list">Inventario</a></li>
-        </ul>
-    </nav>
+    <header>
+        <div class="container">
+            <div class="logo">Mi Tienda</div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar producto...">
+                <button class="btn btn-primary" id="searchBtn">Buscar</button>
+            </div>
+        </div>
+    </header>
 
-    <section id="home" class="landing">
-        <h1 id="color">Bienvenido al sistema de gestión de tienda</h1>
-        <p id="color">Administra fácilmente el inventario de tu tienda.</p>
-    </section>
+    <div class="container">
+        <div class="main-content">
+            <!-- FORMULARIO DE PRODUCTO -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Agregar Producto</h2>
+                    </div>
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="form-group">
+                            <label for="name">Nombre del Producto</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Descripción</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Precio</label>
+                            <input type="number" class="form-control" id="price" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="stock">Stock</label>
+                            <input type="number" class="form-control" id="stock" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Categoría</label>
+                            <select class="form-control" id="category">
+                                <!-- VALORES FIJOS, DEBES USAR LOS ID EXISTENTES EN TU BD -->
+                                <option value="1">Electrónica</option>
+                                <option value="2">Ropa</option>
+                                <option value="3">Alimentos</option>
+                                <option value="4">Hogar</option>
+                                <option value="5">Otro</option>
+                                
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="reset" class="btn btn-primary" id="resetBtn">Limpiar</button>
+                            <button type="submit" class="btn btn-success" id="saveBtn">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-    <section id="register" class="form-section">
-        <h2 id="color">Agregar Producto</h2>
-        <form id="registerForm">
-            <input type="text" id="productName" placeholder="Nombre del producto" required>
-            <input type="text" id="price" placeholder="Precio" required>
-            <input type="text" id="category" placeholder="Categoría" required>
-            <button type="submit">Agregar</button>
-            
-        </form>
-       
-    </section>
-
-    <!-- Modal de Inventario -->
-    <div id="inventoryModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="color">Inventario</h2>
-            <input type="text" id="search" placeholder="Buscar por nombre, precio o categoría">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Categoría</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryList">
-                    <!-- Datos dinámicos -->
-                </tbody>
-            </table>
+            <!-- LISTA DE PRODUCTOS -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Productos</h2>
+                        <div>
+                            <button class="btn btn-primary" id="sortBtn">Ordenar por Precio</button>
+                        </div>
+                    </div>
+                    <div id="productListContainer" class="scrollable-container">
+                        <ul id="productList" class="product-list">
+                          <!-- Aquí se agregan productos dinámicamente -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="/scripts/script.js"></script>
+    <!-- MODAL DE ELIMINACIÓN -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Eliminación</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="cancelDelete">Cancelar</button>
+                <button class="btn btn-danger" id="confirmDelete">Eliminar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TOAST DE NOTIFICACIÓN -->
+    <div id="toast" class="toast hidden"></div>
+
+
+    <!-- JS FUNCIONAL -->
+   <script src="/script.js"></script>
 </body>
 </html>
