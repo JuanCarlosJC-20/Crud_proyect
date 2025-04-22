@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none';">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD Tienda</title>
@@ -68,9 +71,9 @@
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Productos</h2>
-                        <div>
-                            <button class="btn btn-primary" id="sortBtn">Ordenar por Precio</button>
-                        </div>
+                       <div>
+                            <button class="btn btn-primary" id="sortBtn">Pruba boton js</button>
+                        </div> 
                     </div>
                     <div id="productListContainer" class="scrollable-container">
                         <ul id="productList" class="product-list">
@@ -105,6 +108,6 @@
 
 
     <!-- JS FUNCIONAL -->
-   <script src="/script.js"></script>
+   <script src="script.js"></script>
 </body>
 </html>
