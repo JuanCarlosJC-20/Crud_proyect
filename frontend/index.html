@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none';">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD Tienda</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
     <header>
@@ -46,16 +44,15 @@
                             <label for="stock">Stock</label>
                             <input type="number" class="form-control" id="stock" min="0" required>
                         </div>
+                        <div class="g-recaptcha" data-sitekey="6LfKGCErAAAAAMznf-AurbJyBrPxQnKcb8kfPp0a"></div>
                         <div class="form-group">
                             <label for="category">Categoría</label>
                             <select class="form-control" id="category">
-                                <!-- VALORES FIJOS, DEBES USAR LOS ID EXISTENTES EN TU BD -->
                                 <option value="1">Electrónica</option>
                                 <option value="2">Ropa</option>
                                 <option value="3">Alimentos</option>
                                 <option value="4">Hogar</option>
                                 <option value="5">Otro</option>
-                                
                             </select>
                         </div>
                         <div class="form-actions">
@@ -71,9 +68,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Productos</h2>
-                       <div>
-                            <button class="btn btn-primary" id="sortBtn">Pruba boton js</button>
-                        </div> 
                     </div>
                     <div id="productListContainer" class="scrollable-container">
                         <ul id="productList" class="product-list">
@@ -86,28 +80,21 @@
     </div>
 
     <!-- MODAL DE ELIMINACIÓN -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Confirmar Eliminación</h3>
-                <span class="modal-close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar este producto?</p>
-                <p>Esta acción no se puede deshacer.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="cancelDelete">Cancelar</button>
-                <button class="btn btn-danger" id="confirmDelete">Eliminar</button>
-            </div>
-        </div>
+   <!-- MODAL DE ELIMINACIÓN -->
+<div id="deleteModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>¿Estás seguro de que deseas eliminar este producto?</h3>
+        <div class="g-recaptcha" data-sitekey="6LfKGCErAAAAAMznf-AurbJyBrPxQnKcb8kfPp0a"></div>
+        <button id="confirmDeleteBtn" class="btn btn-danger">Eliminar</button>
+        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancelar</button>
     </div>
-    
+</div>
+
+
     <!-- TOAST DE NOTIFICACIÓN -->
     <div id="toast" class="toast hidden"></div>
 
-
     <!-- JS FUNCIONAL -->
-   <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
