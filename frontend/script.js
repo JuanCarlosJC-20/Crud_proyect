@@ -1,18 +1,18 @@
-const API_URL = "http://172.30.6.164:8080/api/products";
+const x2x = "http://172.30.6.164:8080/api/products";
 
 class ProductAPI {
     static async getProducts() {
-        const response = await fetch(API_URL);
+        const response = await fetch(x2x);
         return await response.json();
     }
 
     static async searchProductsByName(name) {
-        const response = await fetch(`${API_URL}/filter/name?name=${encodeURIComponent(name)}`);
+        const response = await fetch(`${x2x}/filter/name?name=${encodeURIComponent(name)}`);
         return await response.json();
     }
 
     static async addProduct(product) {
-        const response = await fetch(API_URL, {
+        const response = await fetch(x2x, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(product)
@@ -21,7 +21,7 @@ class ProductAPI {
     }
 
     static async updateProduct(id, product) {
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${x2x}/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(product)
@@ -30,11 +30,11 @@ class ProductAPI {
     }
 
     static async deleteProduct(id) {
-        return await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        return await fetch(`${x2x}/${id}`, { method: 'DELETE' });
     }
 
     static async getById(id) {
-        const response = await fetch(`${API_URL}/${id}`);
+        const response = await fetch(`${x2x}/${id}`);
         return await response.json();
     }
 }
