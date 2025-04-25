@@ -1,51 +1,87 @@
-const x2x = "http://192.168.125.68:8080/api/products";
+const x2x = "http://172.30.0.27:8080/api/products";
 
 let productIdToDelete = null;
 
+// === API ===
 class ProductAPI {
     static async getProducts() {
-        const response = await fetch(x2x);
-        return await response.json();
+        try {
+            const response = await fetch(x2x);
+            if (!response.ok) throw new Error("Error al obtener productos");
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
     static async searchProductsByName(name) {
-        const response = await fetch(`${x2x}/filter/name?name=${encodeURIComponent(name)}`);
-        return await response.json();
+        try {
+            const response = await fetch(`${x2x}/filter/name?name=${encodeURIComponent(name)}`);
+            if (!response.ok) throw new Error("Error en búsqueda");
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
     static async addProduct(product) {
-        const response = await fetch(x2x, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(product)
-        });
-        return await response.json();
+        try {
+            const response = await fetch(x2x, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
     static async updateProduct(id, product) {
-        const response = await fetch(`${x2x}/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(product)
-        });
-        return await response.json();
+        try {
+            const response = await fetch(`${x2x}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
     static async deleteProduct(id) {
-        const response = await fetch(`${x2x}/${id}`, { method: 'DELETE' });
-        return response;
+        try {
+            return await fetch(`${x2x}/${id}`, { method: 'DELETE' });
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
     static async getById(id) {
-        const response = await fetch(`${x2x}/${id}`);
-        return await response.json();
+        try {
+            const response = await fetch(`${x2x}/${id}`);
+            if (!response.ok) throw new Error("Error al obtener producto");
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     }
 }
 
+// === UI ===
 class UI {
     static async displayProducts() {
-        const products = await ProductAPI.getProducts();
         const list = document.getElementById('productList');
+        list.innerHTML = `<li class="loading">Cargando productos...</li>`;
+
+        const products = await ProductAPI.getProducts();
         list.innerHTML = '';
 
         if (products.length === 0) {
@@ -66,9 +102,10 @@ class UI {
         const list = document.getElementById('productList');
         const item = document.createElement('li');
         item.classList.add('product-item');
+        item.id = `product-${product.id}`;
 
         item.innerHTML = `
-            <div><strong>${product.name}</strong> - ${product.description || ''}</div>
+            <div><strong>${UI.escape(product.name)}</strong> - ${UI.escape(product.description || '')}</div>
             <div>💲<strong>${product.price}</strong> - 🧲 Stock: ${product.stock}</div>
             <div class="product-actions">
                 <button class="btn btn-warning edit-btn">Editar</button>
@@ -82,6 +119,12 @@ class UI {
         list.appendChild(item);
     }
 
+    static escape(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     static clearForm() {
         document.getElementById('productForm').reset();
         document.getElementById('productId').value = '';
@@ -90,6 +133,11 @@ class UI {
 
     static async editProduct(id) {
         const product = await ProductAPI.getById(id);
+        if (!product) {
+            showToast("❌ No se pudo cargar el producto");
+            return;
+        }
+
         document.getElementById('productId').value = product.id;
         document.getElementById('name').value = product.name;
         document.getElementById('description').value = product.description;
@@ -100,13 +148,15 @@ class UI {
 
     static confirmDeleteProduct(id) {
         productIdToDelete = id;
-        document.getElementById('deleteModal').style.display = 'flex';
+        const modal = document.getElementById('deleteModal');
+        const product = document.querySelector(`#product-${id} strong`);
+        modal.querySelector('.modal-body').textContent = `¿Eliminar el producto "${product.textContent}"?`;
+        modal.style.display = 'flex';
     }
 
     static async search() {
-        const query = document.getElementById('searchInput').value;
+        const query = document.getElementById('searchInput').value.trim();
         const results = await ProductAPI.searchProductsByName(query);
-
         const list = document.getElementById('productList');
         list.innerHTML = '';
 
@@ -123,6 +173,7 @@ class UI {
     }
 }
 
+// === Eventos ===
 document.addEventListener('DOMContentLoaded', () => {
     UI.displayProducts();
 
@@ -130,21 +181,20 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const captchaToken = grecaptcha.getResponse(formCaptchaWidgetId);
-
         if (!captchaToken) {
             showToast("⚠️ Verifica que no eres un robot");
             return;
         }
 
         const id = document.getElementById('productId').value;
-        const name = document.getElementById('name').value;
-        const description = document.getElementById('description').value;
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
         const price = parseFloat(document.getElementById('price').value);
         const stock = parseInt(document.getElementById('stock').value);
         const categoryValue = document.getElementById('category').value;
 
-        if (!categoryValue) {
-            showToast("Selecciona una categoría válida");
+        if (!name || isNaN(price) || price < 0 || isNaN(stock) || stock < 0 || !categoryValue) {
+            showToast("⚠️ Revisa los campos del formulario");
             return;
         }
 
@@ -173,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.displayProducts();
         } catch (error) {
             console.error('Error al guardar producto:', error);
-            alert('Ocurrió un error al guardar el producto. Revisa la consola.');
+            alert('❌ Ocurrió un error al guardar el producto.');
         }
     });
 
@@ -183,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('confirmDelete').addEventListener('click', async () => {
         const captchaToken = grecaptcha.getResponse(deleteCaptchaWidgetId);
-        
         if (!captchaToken) {
             showToast("⚠️ Verifica que no eres un robot");
             return;
@@ -212,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// === Toast ===
 function showToast(message) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
@@ -223,12 +273,11 @@ function showToast(message) {
         toast.classList.add('hidden');
     }, 3000);
 }
-//capchap para eliminar 
-// Variables globales para IDs de los widgets captcha
+
+// === Captcha ===
 let formCaptchaWidgetId = null;
 let deleteCaptchaWidgetId = null;
 
-// Callback para inicializar los captchas
 function onCaptchaLoadCallback() {
     formCaptchaWidgetId = grecaptcha.render('formCaptcha', {
         'sitekey': '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
@@ -238,83 +287,11 @@ function onCaptchaLoadCallback() {
         'sitekey': '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
     });
 }
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();  // Deshabilita el clic derecho
-  });
-  
-  document.addEventListener('keydown', function(e) {
-    // Bloquear combinaciones de teclas como F12 y Ctrl+Shift+I
-    if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C"))) {
-      e.preventDefault();
+
+// === Protección básica ===
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', function(e) {
+    if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ["I", "C", "J"].includes(e.key))) {
+        e.preventDefault();
     }
-  });
-
-  //detecta q usen la consola
-  (function () {
-    let isDevToolsOpen = false;
-    let alreadyBlocked = false;
-  
-    const detectDevTools = function () {
-      const start = performance.now();
-      debugger; // Esto detiene el hilo si la consola está abierta
-      const end = performance.now();
-      if (end - start > 100) {
-        isDevToolsOpen = true;
-      }
-    };
-  
-    const blockAllRequests = function () {
-      if (alreadyBlocked) return;
-      alreadyBlocked = true;
-  
-      // Bloqueo de fetch
-      window.fetch = function () {
-        console.warn("🔒 Seguridad: fetch bloqueado.");
-        return Promise.reject(new Error("fetch bloqueado por seguridad"));
-      };
-  
-      // Bloqueo de XMLHttpRequest
-      const BlockedXHR = function () {
-        throw new Error("🔒 Seguridad: XMLHttpRequest bloqueado.");
-      };
-      window.XMLHttpRequest = BlockedXHR;
-  
-      // Bloqueo de WebSocket
-      window.WebSocket = function () {
-        throw new Error("🔒 Seguridad: WebSocket bloqueado.");
-      };
-  
-      // Mensaje de advertencia en la pantalla
-      const warning = document.createElement("div");
-      warning.style.position = "fixed";
-      warning.style.top = "0";
-      warning.style.left = "0";
-      warning.style.width = "100%";
-      warning.style.height = "100%";
-      warning.style.backgroundColor = "#000000ee";
-      warning.style.color = "#ff4f4f";
-      warning.style.display = "flex";
-      warning.style.flexDirection = "column";
-      warning.style.justifyContent = "center";
-      warning.style.alignItems = "center";
-      warning.style.fontSize = "2rem";
-      warning.style.zIndex = "999999";
-      warning.innerHTML = `
-        <strong>⚠️ Seguridad activada</strong>
-        <p>El uso de herramientas de desarrollador está restringido.</p>
-        <p>Las conexiones han sido bloqueadas.</p>
-      `;
-      document.body.appendChild(warning);
-    };
-  
-    // Revisión periódica
-    setInterval(() => {
-      detectDevTools();
-      if (isDevToolsOpen) {
-        console.warn("🚫 DevTools detectado. Bloqueando...");
-        blockAllRequests();
-      }
-    }, 1000);
-  })();
-  
-
+});
