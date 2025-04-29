@@ -7,7 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
+
 
 @Entity(name = "product")
 public class Product {
@@ -29,11 +31,11 @@ public class Product {
     private int stock;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category;  // Esta es la entidad Category
+    private Category category;
 
     // Getters y setters
 
@@ -85,11 +87,11 @@ public class Product {
         this.stock = stock;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 }

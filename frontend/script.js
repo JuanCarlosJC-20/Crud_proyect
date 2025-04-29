@@ -1,5 +1,31 @@
-const x2x = "http://172.30.0.27:8080/api/products";
+// === MANEJO DE PESTAÑAS ===
+document.addEventListener('DOMContentLoaded', function () {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            const tabId = this.getAttribute('data-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
 
+            this.classList.add('active');
+            const activeTabContent = document.getElementById(`${tabId}-tab`);
+            if (activeTabContent) {
+                activeTabContent.classList.add('active');
+            }
+        });
+    });
+
+    const firstTab = tabBtns[0];
+    if (firstTab) {
+        firstTab.classList.add('active');
+        const firstTabId = firstTab.getAttribute('data-tab');
+        document.getElementById(`${firstTabId}-tab`).classList.add('active');
+    }
+});
+
+// === Variables ===
+const x2x = "http://192.168.176.68:8080/api/products";
 let productIdToDelete = null;
 
 // === API ===
@@ -8,7 +34,9 @@ class ProductAPI {
         try {
             const response = await fetch(x2x);
             if (!response.ok) throw new Error("Error al obtener productos");
-            return await response.json();
+            const text = await response.text();
+            if (!text) return [];
+            return JSON.parse(text);
         } catch (error) {
             console.error(error);
             return [];
@@ -19,21 +47,25 @@ class ProductAPI {
         try {
             const response = await fetch(`${x2x}/filter/name?name=${encodeURIComponent(name)}`);
             if (!response.ok) throw new Error("Error en búsqueda");
-            return await response.json();
+            const text = await response.text();
+            if (!text) return [];
+            return JSON.parse(text);
         } catch (error) {
             console.error(error);
             return [];
         }
     }
 
-    static async addProduct(product) {
+    static async addProduct(payload) {
         try {
             const response = await fetch(x2x, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(product)
+                body: JSON.stringify(payload)
             });
-            return await response.json();
+            const text = await response.text();
+            if (!text) return null;
+            return JSON.parse(text);
         } catch (error) {
             console.error(error);
             throw error;
@@ -47,7 +79,9 @@ class ProductAPI {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product)
             });
-            return await response.json();
+            const text = await response.text();
+            if (!text) return null;
+            return JSON.parse(text);
         } catch (error) {
             console.error(error);
             throw error;
@@ -56,7 +90,7 @@ class ProductAPI {
 
     static async deleteProduct(id) {
         try {
-            return await fetch(`${x2x}/${id}`, { method: 'DELETE' });
+            return await fetch(`${x2x}/${id}?captchaToken=${encodeURIComponent(captchaToken)}`, { method: 'DELETE' });
         } catch (error) {
             console.error(error);
             throw error;
@@ -67,10 +101,43 @@ class ProductAPI {
         try {
             const response = await fetch(`${x2x}/${id}`);
             if (!response.ok) throw new Error("Error al obtener producto");
-            return await response.json();
+            const text = await response.text();
+            if (!text) return null;
+            return JSON.parse(text);
         } catch (error) {
             console.error(error);
             return null;
+        }
+    }
+}
+
+class CategoryAPI {
+    static async getCategories() {
+        try {
+            const response = await fetch('http://192.168.176.68:8080/api/categories');
+            if (!response.ok) throw new Error('Error al obtener categorías');
+            const text = await response.text();
+            if (!text) return [];
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+    }
+
+    static async addCategory(category) {
+        try {
+            const response = await fetch('http://192.168.176.68:8080/api/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(category)
+            });
+            const text = await response.text();
+            if (!text) return null;
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(error);
+            throw error;
         }
     }
 }
@@ -156,6 +223,8 @@ class UI {
 
     static async search() {
         const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+
         const results = await ProductAPI.searchProductsByName(query);
         const list = document.getElementById('productList');
         list.innerHTML = '';
@@ -171,11 +240,62 @@ class UI {
             results.forEach(product => UI.addProductToList(product));
         }
     }
+
+    static async loadCategories() {
+        const select = document.getElementById('category');
+        select.innerHTML = '<option value="">Cargando categorías...</option>';
+
+        const categories = await CategoryAPI.getCategories();
+       
+        select.innerHTML = '<option value="">Selecciona una categoría</option>';
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            select.appendChild(option);
+        });
+
+        const categoryList = document.getElementById('categoryList');
+        if (categoryList) {
+            categoryList.innerHTML = '';
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category.name;
+                categoryList.appendChild(li);
+            });
+        }
+    }
+
+    static async addCategory(category) {
+        try {
+            await CategoryAPI.addCategory(category);
+            showToast("✅ Categoría agregada con éxito");
+            UI.loadCategories();
+        } catch (error) {
+            showToast("❌ Error al agregar categoría");
+            console.error(error);
+        }
+    }
 }
 
 // === Eventos ===
 document.addEventListener('DOMContentLoaded', () => {
     UI.displayProducts();
+    UI.loadCategories();
+
+    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const categoryName = document.getElementById('categoryName').value.trim();
+        if (!categoryName) {
+            showToast("⚠️ Ingresa un nombre para la categoría");
+            return;
+        }
+
+        const category = { name: categoryName };
+        UI.addCategory(category);
+    });
 
     document.getElementById('productForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -201,21 +321,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryId = parseInt(categoryValue);
         const createdAt = new Date().toISOString();
 
-        const product = {
-            name,
-            description,
-            price,
-            stock,
-            createdAt,
-            category: { id: categoryId }
+        const productToSend = {
+            captchaToken: captchaToken,
+            product: {
+                name,
+                description,
+                price,
+                stock,
+                createdAt,
+                category: { id: categoryId }
+            }
         };
 
         try {
             if (id) {
-                await ProductAPI.updateProduct(id, product);
+                await ProductAPI.updateProduct(id, productToSend.product);
                 showToast("✅ Producto actualizado con éxito");
             } else {
-                await ProductAPI.addProduct(product);
+                await ProductAPI.addProduct(productToSend);
                 showToast("✅ Producto agregado con éxito");
             }
 
@@ -288,10 +411,209 @@ function onCaptchaLoadCallback() {
     });
 }
 
-// === Protección básica ===
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', function(e) {
-    if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ["I", "C", "J"].includes(e.key))) {
-        e.preventDefault();
+
+// === API para Clientes ===
+const customerApiUrl = "http://192.168.176.68:8080/api/customers";
+
+class CustomerAPI {
+    static async getCustomers() {
+        try {
+            const response = await fetch(customerApiUrl);
+            if (!response.ok) throw new Error("Error al obtener clientes");
+            const text = await response.text();
+            if (!text) return [];
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
+
+    static async addCustomer(payload) {
+        try {
+            const response = await fetch(customerApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error("Error al agregar cliente");
+            const text = await response.text();
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    static async updateCustomer(id, customer) {
+        try {
+            const response = await fetch(`${customerApiUrl}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customer)
+            });
+            if (!response.ok) throw new Error("Error al actualizar cliente");
+            const text = await response.text();
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    static async deleteCustomer(id) {
+        try {
+            const response = await fetch(`${customerApiUrl}/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error("Error al eliminar cliente");
+            return response;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    static async getById(id) {
+        try {
+            const response = await fetch(`${customerApiUrl}/${id}`);
+            if (!response.ok) throw new Error("Error al obtener cliente");
+            const text = await response.text();
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+}
+
+// === UI para Clientes ===
+class CustomerUI {
+    static async displayCustomers() {
+        const list = document.getElementById('customerList');
+        list.innerHTML = `<li class="loading">Cargando clientes...</li>`;
+
+        const customers = await CustomerAPI.getCustomers();
+        list.innerHTML = '';
+
+        if (customers.length === 0) {
+            list.innerHTML = `
+                <li class="empty-state">
+                    <i>👥</i>
+                    <p>No hay clientes agregados aún.</p>
+                </li>
+            `;
+            return;
+        }
+
+        customers.forEach(customer => CustomerUI.addCustomerToList(customer));
+    }
+
+    static addCustomerToList(customer) {
+        const list = document.getElementById('customerList');
+        const item = document.createElement('li');
+        item.classList.add('customer-item');
+        item.id = `customer-${customer.id}`;
+
+        item.innerHTML = `
+            <div><strong>${CustomerUI.escape(customer.name)}</strong> - ${CustomerUI.escape(customer.email || '')}</div>
+            <div class="customer-actions">
+                <button class="btn btn-warning edit-btn">Editar</button>
+                <button class="btn btn-danger delete-btn">Eliminar</button>
+            </div>
+        `;
+
+        item.querySelector('.edit-btn').addEventListener('click', () => CustomerUI.editCustomer(customer.id));
+        item.querySelector('.delete-btn').addEventListener('click', () => CustomerUI.confirmDeleteCustomer(customer.id));
+
+        list.appendChild(item);
+    }
+
+    static escape(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    static clearForm() {
+        document.getElementById('customerForm').reset();
+        document.getElementById('customerId').value = '';
+    }
+
+    static async editCustomer(id) {
+        const customer = await CustomerAPI.getById(id);
+        if (!customer) {
+            showToast("❌ No se pudo cargar el cliente");
+            return;
+        }
+
+        document.getElementById('customerId').value = customer.id;
+        document.getElementById('customerName').value = customer.name;
+        document.getElementById('customerEmail').value = customer.email;
+    }
+
+    static confirmDeleteCustomer(id) {
+        const modal = document.getElementById('deleteCustomerModal');
+        const customer = document.querySelector(`#customer-${id} strong`);
+        modal.querySelector('.modal-body').textContent = `¿Eliminar al cliente "${customer.textContent}"?`;
+        modal.style.display = 'flex';
+
+        // Asignar el ID del cliente al campo de confirmación de eliminación
+        document.getElementById('customerIdToDelete').value = id;
+    }
+}
+
+// === Eventos de Clientes ===
+document.addEventListener('DOMContentLoaded', () => {
+    CustomerUI.displayCustomers();
+
+    // Agregar o editar cliente
+    document.getElementById('customerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('customerName').value.trim();
+        const email = document.getElementById('customerEmail').value.trim();
+
+        if (!name || !email) {
+            showToast("⚠️ Todos los campos son obligatorios");
+            return;
+        }
+
+        const customerData = { name: name, email: email };
+        const customerId = document.getElementById('customerId').value;
+
+        try {
+            if (customerId) {
+                // Actualizar cliente
+                await CustomerAPI.updateCustomer(customerId, customerData);
+                showToast("✅ Cliente actualizado con éxito");
+            } else {
+                // Agregar cliente
+                await CustomerAPI.addCustomer(customerData);
+                showToast("✅ Cliente agregado con éxito");
+            }
+            CustomerUI.displayCustomers(); // Recargar la lista de clientes
+            document.getElementById('customerForm').reset(); // Limpiar el formulario
+        } catch (error) {
+            console.error(error);
+            showToast("❌ Error al agregar o actualizar cliente");
+        }
+    });
+
+    // Eliminar Cliente
+    document.getElementById('confirmDeleteCustomer').addEventListener('click', async () => {
+        const customerId = document.getElementById('customerIdToDelete').value;
+
+        try {
+            await CustomerAPI.deleteCustomer(customerId);
+            document.getElementById('deleteCustomerModal').style.display = 'none';
+            CustomerUI.displayCustomers();
+            showToast("✅ Cliente eliminado con éxito");
+        } catch (error) {
+            showToast("❌ Error al eliminar cliente");
+            console.error(error);
+        }
+    });
+
+    document.getElementById('cancelDeleteCustomer').addEventListener('click', () => {
+        document.getElementById('deleteCustomerModal').style.display = 'none';
+    });
 });

@@ -15,6 +15,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CaptchaService captchaService; // Inyectar el CaptchaService
+
     // Obtener todos los productos
     public List<Product> findAll() {
         return productRepository.findAll();
@@ -45,7 +48,7 @@ public class ProductService {
         return productRepository.findByCategoryId(categoryId);
     }
 
-     // Método para obtener productos por createdAt
+    // Método para obtener productos por createdAt
     public List<Product> getProductsByCreatedAt(LocalDate createdAt) {
         return productRepository.findByCreatedAt(createdAt);
     }
@@ -54,4 +57,23 @@ public class ProductService {
     public List<Product> findByPriceBetween(double minPrice, double maxPrice) {
         return productRepository.findByPriceBetween(minPrice, maxPrice);
     }
+
+    // Método para guardar un producto con validación del captcha
+    public Product saveWithCaptchaValidation(Product product, String captchaToken) {
+        // Validar el captcha con el CaptchaService
+        if (!captchaService.validateCaptcha(captchaToken)) {
+            throw new IllegalArgumentException("Captcha inválido");
+        }
+
+        // Si el captcha es válido, proceder a guardar el producto
+        return productRepository.save(product);
+    }
+
+   
+
+    // Implementación de existsById
+public boolean existsById(int id) {
+    return productRepository.existsById(id);
+}
+
 }

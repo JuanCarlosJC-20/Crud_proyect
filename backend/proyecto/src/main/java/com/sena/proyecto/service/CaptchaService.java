@@ -1,70 +1,68 @@
 package com.sena.proyecto.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
 
 @Service
 public class CaptchaService {
 
-    private static final String GOOGLE_RECAPTCHA_VERIFY_URL =
-            "https://www.google.com/recaptcha/api/siteverify";
+    @Value("${google.recaptcha.secret-key}")
+    private String recaptchaSecretKey;
 
-    @Value("${google.recaptcha.secret}")
-    private String recaptchaSecret;
+    private static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
-    @Value("${google.recaptcha.expected-hostname}")
-    private String expectedHostname;
+    private final RestTemplate restTemplate;
 
-    public boolean verify(String responseToken) {
-        if (responseToken == null || responseToken.trim().isEmpty()) {
-            System.out.println("⚠️ Token vacío o nulo.");
+    public CaptchaService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public boolean validateCaptcha(String captchaToken) {
+        if (captchaToken == null || captchaToken.isEmpty()) {
             return false;
         }
 
-        RestTemplate restTemplate = new RestTemplate();
+        String url = RECAPTCHA_VERIFY_URL + "?secret=" + recaptchaSecretKey + "&response=" + captchaToken;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        CaptchaResponse response = restTemplate.postForObject(url, null, CaptchaResponse.class);
 
-        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("secret", recaptchaSecret);
-        requestBody.add("response", responseToken);
+        return response != null && response.isSuccess();
+    }
 
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+    public static class CaptchaResponse {
+        private boolean success;
+        private String challenge_ts;
+        private String hostname;
 
-        ResponseEntity<Map<String, Object>> response = restTemplate.postForEntity(
-                GOOGLE_RECAPTCHA_VERIFY_URL,
-                requestEntity,
-                (Class<Map<String, Object>>)(Class<?>) Map.class
-        );
-
-        Map<String, Object> body = response.getBody();
-        if (body == null) {
-            System.out.println("❌ Respuesta nula desde Google reCAPTCHA.");
-            return false;
+        public boolean isSuccess() {
+            return success;
         }
 
-        Boolean success = (Boolean) body.get("success");
-        String hostname = (String) body.get("hostname");
-
-        if (!Boolean.TRUE.equals(success)) {
-            List<String> errors = (List<String>) body.get("error-codes");
-            System.out.println("❌ Verificación fallida. Errores: " + errors);
-            return false;
+        public void setSuccess(boolean success) {
+            this.success = success;
         }
 
-        if (expectedHostname != null && !expectedHostname.equals(hostname)) {
-            System.out.println("❌ Hostname no coincide. Esperado: " + expectedHostname + ", recibido: " + hostname);
-            return false;
+        public String getChallenge_ts() {
+            return challenge_ts;
         }
 
-        return true;
+        public void setChallenge_ts(String challenge_ts) {
+            this.challenge_ts = challenge_ts;
+        }
+
+        public String getHostname() {
+            return hostname;
+        }
+
+        public void setHostname(String hostname) {
+            this.hostname = hostname;
+        }
+    }
+
+    public boolean verify(String token) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'verify'");
     }
 }
