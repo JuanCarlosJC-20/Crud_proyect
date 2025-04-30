@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // === Variables ===
-const x2x = "http://192.168.176.68:8080/api/products";
+const x2x = "http://172.30.3.160:8080/api/products";
 let productIdToDelete = null;
 
 // === API ===
@@ -114,7 +114,7 @@ class ProductAPI {
 class CategoryAPI {
     static async getCategories() {
         try {
-            const response = await fetch('http://192.168.176.68:8080/api/categories');
+            const response = await fetch('http://172.30.3.160:8080/api/categories');
             if (!response.ok) throw new Error('Error al obtener categorías');
             const text = await response.text();
             if (!text) return [];
@@ -125,13 +125,19 @@ class CategoryAPI {
         }
     }
 
-    static async addCategory(category) {
+    static async addCategory(category, captchaToken) {
         try {
-            const response = await fetch('http://192.168.176.68:8080/api/categories', {
+            const payload = {
+                captchaToken: captchaToken, // Se agrega el token de captcha
+                category: category // El objeto categoría
+            };
+
+            const response = await fetch('http://172.30.3.160:8080/api/categories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(category)
+                body: JSON.stringify(payload)
             });
+
             const text = await response.text();
             if (!text) return null;
             return JSON.parse(text);
@@ -141,6 +147,7 @@ class CategoryAPI {
         }
     }
 }
+
 
 // === UI ===
 class UI {
@@ -286,16 +293,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('categoryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-
+    
+        const captchaToken = grecaptcha.getResponse(categoryFormCaptchaWidgetId);
+        if (!captchaToken) {
+            showToast("⚠️ Verifica que no eres un robot");
+            return;
+        }
+    
         const categoryName = document.getElementById('categoryName').value.trim();
         if (!categoryName) {
             showToast("⚠️ Ingresa un nombre para la categoría");
             return;
         }
-
-        const category = { name: categoryName };
-        UI.addCategory(category);
+    
+        const payload = {
+            captchaToken,
+            category: { name: categoryName }
+        };
+    
+        try {
+            await CategoryAPI.addCategory(payload);
+            showToast("✅ Categoría agregada con éxito");
+            UI.loadCategories();
+            document.getElementById('categoryForm').reset();
+            grecaptcha.reset(categoryFormCaptchaWidgetId);
+        } catch (error) {
+            console.error(error);
+            showToast("❌ Error al agregar categoría");
+        }
     });
+    
 
     document.getElementById('productForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -400,20 +427,36 @@ function showToast(message) {
 // === Captcha ===
 let formCaptchaWidgetId = null;
 let deleteCaptchaWidgetId = null;
+let customerFormCaptchaWidgetId = null;
+let deleteCustomerCaptchaWidgetId = null;
+let categoryFormCaptchaWidgetId = null;
 
 function onCaptchaLoadCallback() {
     formCaptchaWidgetId = grecaptcha.render('formCaptcha', {
-        'sitekey': '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
+        sitekey: '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
     });
 
     deleteCaptchaWidgetId = grecaptcha.render('deleteCaptcha', {
-        'sitekey': '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
+        sitekey: '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
+    });
+
+    customerFormCaptchaWidgetId = grecaptcha.render('customerFormCaptcha', {
+        sitekey: '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
+    });
+
+    deleteCustomerCaptchaWidgetId = grecaptcha.render('deleteCustomerCaptcha', {
+        sitekey: '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
+    });
+
+    categoryFormCaptchaWidgetId = grecaptcha.render('categoryFormCaptcha', {
+        sitekey: '6LeBDyIrAAAAAHdwjAS0twFgUkp3gJgnWn3qDfW-'
     });
 }
 
 
+
 // === API para Clientes ===
-const customerApiUrl = "http://192.168.176.68:8080/api/customers";
+const customerApiUrl = "http://172.30.3.160:8080/api/customers";
 
 class CustomerAPI {
     static async getCustomers() {
@@ -565,55 +608,70 @@ class CustomerUI {
 document.addEventListener('DOMContentLoaded', () => {
     CustomerUI.displayCustomers();
 
-    // Agregar o editar cliente
-    document.getElementById('customerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+    
+   // Agregar o editar cliente
+document.getElementById('customerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        const name = document.getElementById('customerName').value.trim();
-        const email = document.getElementById('customerEmail').value.trim();
+    const captchaToken = grecaptcha.getResponse(customerFormCaptchaWidgetId);
+    if (!captchaToken) {
+        showToast("⚠️ Verifica que no eres un robot");
+        return;
+    }
 
-        if (!name || !email) {
-            showToast("⚠️ Todos los campos son obligatorios");
-            return;
+    const name = document.getElementById('customerName').value.trim();
+    const email = document.getElementById('customerEmail').value.trim();
+
+    if (!name || !email) {
+        showToast("⚠️ Todos los campos son obligatorios");
+        return;
+    }
+
+    const payload = {
+        captchaToken,
+        customer: { name, email }
+    };
+
+    const customerId = document.getElementById('customerId').value;
+
+    try {
+        if (customerId) {
+            await CustomerAPI.updateCustomer(customerId, payload.customer);
+            showToast("✅ Cliente actualizado con éxito");
+        } else {
+            await CustomerAPI.addCustomer(payload);
+            showToast("✅ Cliente agregado con éxito");
         }
+        CustomerUI.displayCustomers();
+        document.getElementById('customerForm').reset();
+        grecaptcha.reset(customerFormCaptchaWidgetId);
+    } catch (error) {
+        console.error(error);
+        showToast("❌ Error al agregar o actualizar cliente");
+    }
+});
 
-        const customerData = { name: name, email: email };
-        const customerId = document.getElementById('customerId').value;
-
-        try {
-            if (customerId) {
-                // Actualizar cliente
-                await CustomerAPI.updateCustomer(customerId, customerData);
-                showToast("✅ Cliente actualizado con éxito");
-            } else {
-                // Agregar cliente
-                await CustomerAPI.addCustomer(customerData);
-                showToast("✅ Cliente agregado con éxito");
-            }
-            CustomerUI.displayCustomers(); // Recargar la lista de clientes
-            document.getElementById('customerForm').reset(); // Limpiar el formulario
-        } catch (error) {
-            console.error(error);
-            showToast("❌ Error al agregar o actualizar cliente");
-        }
-    });
 
     // Eliminar Cliente
     document.getElementById('confirmDeleteCustomer').addEventListener('click', async () => {
+        const captchaToken = grecaptcha.getResponse(deleteCustomerCaptchaWidgetId);
+        if (!captchaToken) {
+            showToast("⚠️ Verifica que no eres un robot");
+            return;
+        }
+    
         const customerId = document.getElementById('customerIdToDelete').value;
-
+    
         try {
-            await CustomerAPI.deleteCustomer(customerId);
+            await CustomerAPI.deleteCustomer(`${customerId}?captchaToken=${encodeURIComponent(captchaToken)}`);
             document.getElementById('deleteCustomerModal').style.display = 'none';
             CustomerUI.displayCustomers();
             showToast("✅ Cliente eliminado con éxito");
+            grecaptcha.reset(deleteCustomerCaptchaWidgetId);
         } catch (error) {
             showToast("❌ Error al eliminar cliente");
             console.error(error);
         }
     });
-
-    document.getElementById('cancelDeleteCustomer').addEventListener('click', () => {
-        document.getElementById('deleteCustomerModal').style.display = 'none';
-    });
+    
 });

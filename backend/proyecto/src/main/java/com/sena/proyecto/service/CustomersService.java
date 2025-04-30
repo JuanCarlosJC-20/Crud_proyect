@@ -14,6 +14,9 @@ public class CustomersService {
     @Autowired
     private CustomersRepository customersRepository;
 
+    @Autowired
+    private CaptchaService captchaService;
+
     // Obtener todos los clientes
     public List<Customer> findAll() {
         return customersRepository.findAll();
@@ -24,8 +27,22 @@ public class CustomersService {
         return customersRepository.findById(id);
     }
 
-    // Guardar o actualizar cliente
+    // Guardar o actualizar cliente sin validación
     public Customer save(Customer customer) {
+        return customersRepository.save(customer);
+    }
+
+    // Guardar con validación de Captcha
+    public Customer saveWithCaptchaValidation(Customer customer, String captchaToken) {
+        if (captchaToken == null || captchaToken.isEmpty()) {
+            throw new IllegalArgumentException("Captcha token es requerido");
+        }
+
+        boolean isValid = captchaService.validateCaptcha(captchaToken);
+        if (!isValid) {
+            throw new IllegalArgumentException("Captcha inválido");
+        }
+
         return customersRepository.save(customer);
     }
 
@@ -34,12 +51,17 @@ public class CustomersService {
         customersRepository.deleteById(id);
     }
 
-    // Buscar por nombre (filtro parcial, sin importar mayúsculas/minúsculas)
+    // Verificar existencia
+    public boolean existsById(int id) {
+        return customersRepository.existsById(id);
+    }
+
+    // Buscar por nombre
     public List<Customer> findByName(String name) {
         return customersRepository.findByNameContainingIgnoreCase(name);
     }
 
-    // Buscar por email (filtro parcial, sin importar mayúsculas/minúsculas)
+    // Buscar por email
     public List<Customer> findByEmail(String email) {
         return customersRepository.findByEmailContainingIgnoreCase(email);
     }

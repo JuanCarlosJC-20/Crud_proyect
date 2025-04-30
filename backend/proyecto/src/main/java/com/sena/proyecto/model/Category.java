@@ -25,6 +25,11 @@ public class Category {
     @JsonIgnore  // Evita la recursividad infinita al serializar la categoría
     private List<Product> products;
 
+
+    public Category() {
+        // Constructor vacío necesario para la deserialización
+    }
+
     // Getters y setters
 
     public int getId() {

@@ -1,50 +1,82 @@
 package com.sena.proyecto.controller;
 
 import com.sena.proyecto.model.Customer;
+import com.sena.proyecto.model.CustomerRequest;
 import com.sena.proyecto.service.CustomersService;
+import com.sena.proyecto.service.CaptchaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
-@RequestMapping("/api/customers")  // Ruta del controlador de clientes
+@RequestMapping("/api/customers")
 public class CustomersController {
 
     @Autowired
     private CustomersService customersService;
 
-    // Obtener todos los clientes
+    @Autowired
+    private CaptchaService captchaService;
+
     @GetMapping
-    public List<Customer> getAll() {
-        return customersService.findAll();  // Cambié "getAll()" por "findAll()"
+    public ResponseEntity<List<Customer>> getAll() {
+        List<Customer> customers = customersService.findAll();
+        if (customers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(customers);
     }
 
-    // Obtener un cliente por ID
     @GetMapping("/{id}")
-    public Customer getById(@PathVariable int id) {
-        Optional<Customer> customer = customersService.findById(id);  // Cambié "getById()" por "findById()"
-        return customer.orElse(null);  // Retorna null si no se encuentra el cliente
+    public ResponseEntity<Customer> getById(@PathVariable int id) {
+        return customersService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Crear un nuevo cliente
     @PostMapping
-    public Customer create(@RequestBody Customer customer) {
-        return customersService.save(customer);
+    public ResponseEntity<?> create(@RequestBody CustomerRequest request) {
+        if (request.getCaptchaToken() == null || request.getCaptchaToken().isEmpty()) {
+            return ResponseEntity.badRequest().body("❌ captchaToken es requerido");
+        }
+
+        boolean validCaptcha = captchaService.validateCaptcha(request.getCaptchaToken());
+        if (!validCaptcha) {
+            return ResponseEntity.badRequest().body("❌ Captcha inválido");
+        }
+
+        try {
+            Customer saved = customersService.save(request.getCustomer());
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("❌ Error interno al guardar el cliente");
+        }
     }
 
-    // Actualizar un cliente
     @PutMapping("/{id}")
-    public Customer update(@PathVariable int id, @RequestBody Customer customer) {
+    public ResponseEntity<?> update(@PathVariable int id, @RequestBody Customer customer) {
+        if (!customersService.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         customer.setId(id);
-        return customersService.save(customer);
+        return ResponseEntity.ok(customersService.save(customer));
     }
 
-    // Eliminar un cliente
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) {
-        customersService.deleteById(id);  // Cambié "delete()" por "deleteById()" para que coincida con el servicio
+    public ResponseEntity<?> delete(@PathVariable int id, @RequestParam(required = false) String captchaToken) {
+        if (captchaToken == null || !captchaService.validateCaptcha(captchaToken)) {
+            return ResponseEntity.badRequest().body("❌ Captcha inválido o ausente");
+        }
+
+        if (!customersService.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        customersService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
